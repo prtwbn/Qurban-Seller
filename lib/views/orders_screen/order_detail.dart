@@ -1,14 +1,12 @@
-//import 'package:flutter/src/widgets/container.dart';
-//import 'package:flutter/src/widgets/framework.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart' as intl;
+
 import 'package:qurban_seller/const/const.dart';
 import 'package:qurban_seller/controllers/orders_controller.dart';
 import 'package:qurban_seller/views/messages_screen/chat_screen.dart';
 import 'package:qurban_seller/views/orders_screen/components/order_place.dart';
 import 'package:qurban_seller/views/orders_screen/components/order_status.dart';
-import 'package:qurban_seller/views/widgets/our_button.dart';
 import 'package:qurban_seller/views/widgets/text_style.dart';
-import 'package:intl/intl.dart' as intl;
 
 class OrderDetails extends StatefulWidget {
   final dynamic data;
@@ -26,7 +24,7 @@ class _OrderDetailsState extends State<OrderDetails> {
     if (widget.data['order_placed'] == false) {
       // Order sudah dibatalkan sebelumnya
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text("Maaf bookingan sudah dibatalkan sebelumnya"),
           duration: Duration(seconds: 2),
         ),
@@ -67,15 +65,15 @@ class _OrderDetailsState extends State<OrderDetails> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Confirmation"),
+          title: const Text("Confirmation"),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Apakah Anda yakin ingin membatalkan bookingan ini?"),
-              SizedBox(height: 20.0),
+              const Text("Apakah Anda yakin ingin membatalkan bookingan ini?"),
+              const SizedBox(height: 20.0),
               TextField(
                 controller: cancellationReasonController,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   labelText: "Alasan Pembatalan",
                   border: OutlineInputBorder(),
                 ),
@@ -85,17 +83,17 @@ class _OrderDetailsState extends State<OrderDetails> {
           ),
           actions: <Widget>[
             TextButton(
-              child: Text("Tidak"),
+              child: const Text("Tidak"),
               onPressed: () {
                 Navigator.of(context).pop(); // Tutup dialog
               },
             ),
             TextButton(
-              child: Text("Ya"),
+              child: const Text("Ya"),
               onPressed: () async {
                 if (cancellationReasonController.text.trim().isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: Text(
                           "Harap isi alasan pembatalan agar bookingan dapat dibatalkan!"),
                       duration: Duration(seconds: 2),
@@ -118,7 +116,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                 if (widget.data['order_placed'] == false) {
                   // Order sudah dibatalkan sebelumnya
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content:
                           Text("Maaf bookingan sudah dibatalkan sebelumnya"),
                       duration: Duration(seconds: 2),
@@ -158,13 +156,14 @@ class _OrderDetailsState extends State<OrderDetails> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {
-              Get.back();
-            },
-            icon: const Icon(
-              Icons.arrow_back,
-              color: darkGrey,
-            )),
+          onPressed: () {
+            Get.back();
+          },
+          icon: const Icon(
+            Icons.arrow_back,
+            color: darkGrey,
+          ),
+        ),
         title: boldText(text: "Order details", color: fontGrey, size: 16.0),
       ),
       body: Padding(
@@ -188,7 +187,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                     onPressed: widget.data['order_placed']
                         ? cancelOrderConfirmation // Ubah dari cancelOrder menjadi cancelOrderConfirmation
                         : null,
-                    child: Text("Batalkan Booking"),
+                    child: const Text("Batalkan Booking"),
                   ),
                   orderStatus(
                       color: Colors.purple,
@@ -203,19 +202,19 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 context: context,
                                 builder: (BuildContext context) {
                                   return AlertDialog(
-                                    title: Text("Confirmation"),
-                                    content: Text(
+                                    title: const Text("Confirmation"),
+                                    content: const Text(
                                         "Apakah Anda yakin ingin menyelesaikan bookingan ini?"),
                                     actions: <Widget>[
                                       TextButton(
-                                        child: Text("Tidak"),
+                                        child: const Text("Tidak"),
                                         onPressed: () {
                                           Navigator.of(context)
                                               .pop(); // Close the dialog
                                         },
                                       ),
                                       TextButton(
-                                        child: Text("Ya"),
+                                        child: const Text("Ya"),
                                         onPressed: () async {
                                           finishOrder(); // Call the finishOrder function
                                           Navigator.of(context)
@@ -227,7 +226,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 });
                           }
                         : null, // Jika order_placed adalah false atau order_delivered adalah true, maka tombol menjadi tidak aktif
-                    child: Text("Selesaikan Bookingan"),
+                    child: const Text("Selesaikan Bookingan"),
                   ),
                 ],
               )
@@ -279,7 +278,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                               boldText(
                                   text: "Total Amount", color: purpleColor),
                               boldText(
-                                  text: "\Rp. ${widget.data['total_amount']}",
+                                  text: "Rp. ${widget.data['total_amount']}",
                                   color: red,
                                   size: 16.0)
                             ],
@@ -323,28 +322,24 @@ class _OrderDetailsState extends State<OrderDetails> {
                             d2: ""),
                         const Divider(),
                         SizedBox(
-                          width: double.infinity, // mengambil lebar penuh
+                          width: double.infinity,
                           height: 50.0,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              primary: Color.fromARGB(255, 219, 201,
-                                  32), // Warna latar button menjadi putih
-                              onPrimary: Colors.black, // Warna teks button
+                              backgroundColor:
+                                  const Color.fromARGB(255, 219, 201, 32),
+                              foregroundColor: Colors.black,
                             ),
                             onPressed: () {
-                              // Navigasi ke ChatScreen dengan data penjual yang diperlukan
-                              //Navigator.push(context, MaterialPageRoute(builder: (context) => ChatScreen(sellerData: widget.data['seller'])));
                               Get.to(
                                 () => const ChatScreen(),
                                 arguments: [
-                                  
                                   widget.data['order_by'],
-                                  widget.data['orders'][index]['sellername'],
                                   widget.data['orders'][index]['vendor_id'],
                                 ],
                               );
                             },
-                            child: Text("Hubungi Pembeli"),
+                            child: const Text("Hubungi Pembeli"),
                           ),
                         ),
                       ],

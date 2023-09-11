@@ -2,11 +2,18 @@ import 'package:qurban_seller/const/const.dart';
 
 class StoreServices {
   static getProfile(uid) {
-    return firestore.collection(vendorsCollection).where('id', isEqualTo: uid).get() ;
+    return firestore
+        .collection(vendorsCollection)
+        .where('id', isEqualTo: uid)
+        .get();
   }
 
   static getMessages(uid) {
-    return firestore.collection(chatsCollection).where('users',arrayContains: uid).snapshots();
+    print(uid);
+    return firestore
+        .collection(chatsCollection)
+        .where('users', arrayContains: uid)
+        .snapshots();
   }
 
   //get all chat messages
@@ -20,10 +27,16 @@ class StoreServices {
   }
 
   static getOrders(uid) {
-    return firestore.collection(orderCollection).where('vendors', arrayContains: uid).snapshots();
+    return firestore
+        .collection(orderCollection)
+        .where('vendors', arrayContains: uid)
+        .snapshots();
   }
 
   static getProducts(uid) {
-    return firestore.collection(productsCollection).where('vendor_id', isEqualTo: uid).snapshots();
+    return firestore
+        .collection(productsCollection)
+        .where('vendor_id', isEqualTo: uid)
+        .snapshots();
   }
 }
