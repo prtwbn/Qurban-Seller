@@ -27,40 +27,41 @@ class MessagesScreen extends StatelessWidget {
             return loadingIndicator();
           } else {
             var data = snapshot.data!.docs;
-            print(data);
+
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: List.generate(data.length, (index) {
-                      var t = data[index]['created_on'] == null
-                          ? DateTime.now()
-                          : data[index]['created_on'].toDate();
-                      var time = intl.DateFormat("h:mma").format(t);
-                      // print(data[index]['friend_name']);
-                      return ListTile(
-                        onTap: () {
-                          try {
-                            Get.to(() => ChatScreen(), arguments: [
-                              data[index]['friend_name'],
-                              data[index]['fromId'],
-                              data[index]['told'],
-                            ]);
-                          } catch (e) {
-                            print(e);
-                          }
-                        },
-                        leading: FutureBuilder<DocumentSnapshot>(
-                          future: FirebaseFirestore.instance
-                              .collection('users')
-                              .doc(data[index]['fromId'])
-                              .get(),
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              dynamic vendorData = snapshot.data!.data();
-                              String imageUrl = vendorData['imageUrl'];
-                              return imageUrl.isNotEmpty
+                      // var t = data[index]['created_on'] == null
+                      //     ? DateTime.now()
+                      //     : data[index]['created_on'].toDate();
+                      // var time = intl.DateFormat("h:mma").format(t);
+                      return FutureBuilder<DocumentSnapshot>(
+                        future: FirebaseFirestore.instance
+                            .collection('users')
+                            .doc(data[index]['users']
+                                .where((user) => user != currentUser!.uid)
+                                .first)
+                            .get(),
+                        builder: (context, userSnapshot) {
+                          if (userSnapshot.hasData) {
+                            dynamic userData = userSnapshot.data!.data();
+
+                            String imageUrl = userData['imageUrl'];
+
+                            return ListTile(
+                              onTap: () {
+                                Get.to(() => const ChatScreen(), arguments: [
+                                  data[index]['users']
+                                      .where((user) => user != currentUser!.uid)
+                                      .first,
+                                  data[index]['fromId'],
+                                  data[index]['told'],
+                                ]);
+                              },
+                              leading: imageUrl.isNotEmpty
                                   ? Image.network(imageUrl,
                                           width: 50, fit: BoxFit.cover)
                                       .box
@@ -72,21 +73,19 @@ class MessagesScreen extends StatelessWidget {
                                       .box
                                       .roundedFull
                                       .clip(Clip.antiAlias)
-                                      .make();
-                            } else if (snapshot.hasError) {
-                              return const Text('Failed to load data');
-                            } else {
-                              return const CircularProgressIndicator();
-                            }
-                          },
-                        ),
-                        title: boldText(
-                            text: "${data[index]['sender_name']}",
-                            color: fontGrey),
-                        subtitle: normalText(
-                            text: "${data[index]['last_msg']}",
-                            color: darkGrey),
-                        
+                                      .make(),
+                              title: boldText(
+                                  text: userData['name'], color: fontGrey),
+                              subtitle: normalText(
+                                  text: data[index]['last_msg'],
+                                  color: darkGrey),
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Text('Failed to load data');
+                          } else {
+                            return const CircularProgressIndicator();
+                          }
+                        },
                       );
                     }),
                   )),

@@ -34,13 +34,14 @@ class ChatsController extends GetxController {
   /// Jika ada, ambil chatId
   /// Jika tidak ada, buat baru
   void getChatId() async {
-    var chatSnapshot = await chats
-        .where('users', whereIn: [
-          [friendId, currentId],
-          [currentId, friendId]
-        ])
-        .limit(1)
-        .get();
+    print("friendId: ${friendId}");
+    print("currentId: ${currentId}");
+    var chatSnapshot = await chats.where('users', whereIn: [
+      [friendId, currentId],
+      [currentId, friendId]
+    ]).get();
+
+    print("chatSnapshot.docs: ${chatSnapshot.docs}");
 
     if (chatSnapshot.docs.isNotEmpty) {
       chatDocId = chatSnapshot.docs.single.id;
