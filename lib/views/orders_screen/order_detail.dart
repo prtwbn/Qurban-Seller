@@ -335,6 +335,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 () => const ChatScreen(),
                                 arguments: [
                                   widget.data['order_by'],
+                                  widget.data['order_by_name'],
                                   widget.data['orders'][index]['vendor_id'],
                                 ],
                               );

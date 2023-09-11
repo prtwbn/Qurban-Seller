@@ -20,7 +20,8 @@ class ChatsController extends GetxController {
     super.onInit();
 
     friendId = Get.arguments[0];
-    told = Get.arguments[1];
+    friendName = Get.arguments[1];
+    told = Get.arguments[2];
     chats = FirebaseFirestore.instance.collection(chatsCollection);
     senderName = Get.find<HomeController>().username;
     currentId = currentUser!.uid;
