@@ -16,6 +16,7 @@ class OrdersScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     //var controller = Get.put(OrdersController());
     return Scaffold(
+      backgroundColor: Color.fromRGBO(239, 239, 239, 1),
       appBar: appbarWidget(orders),
       body: StreamBuilder(
         stream: StoreServices.getOrders(currentUser!.uid),
@@ -25,65 +26,71 @@ class OrdersScreen extends StatelessWidget {
             return loadingIndicator();
           } else {
             var data = snapshot.data!.docs;
+            if (data.isEmpty) {
+              // Jika tidak ada produk
+              return Center(child: Text("Belum ada pesanan yang masuk"));
+            }
             return Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  child: Column(
-                    children: List.generate(
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                        children: List.generate(
                       data.length,
                       ((index) {
                         var time = data[index]['order_date'].toDate();
-                        return ListTile(
-                          onTap: () {
-                            Get.to(() => OrderDetails(data: data[index]));
-                          },
-                          tileColor: textfieldGrey,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          title: boldText(
-                              text: "${data[index]['order_code']}",
-                              color: purpleColor),
-                          subtitle: Column(
-                            children: [
-                              Row(
-                                children: [
-                                  const Icon(Icons.calendar_month,
-                                      color: fontGrey),
-                                  10.widthBox,
-                                  boldText(
-                                      text: intl.DateFormat()
-                                          .add_yMd()
-                                          .add_Hm()
-                                          .format(time),
-                                      color: fontGrey),
-                                ],
-                              ),
-                              /*
-                              Row(
-                                children: [
-                                  const Icon(Icons.payment, color: fontGrey),
-                                  10.widthBox,
-                                  boldText(text: unpaid, color: red)
-                                ],
-                              )*/
-                            ],
-                          ),
-                          trailing: boldText(
-                              text: "Rp. ${data[index]['total_amount']}",
+                        return Card(
+                          elevation: 2, // Tambahkan bayangan
+                          margin: const EdgeInsets.only(bottom: 8),
+                          child: ListTile(
+                            onTap: () {
+                              Get.to(() => OrderDetails(data: data[index]));
+                            },
+                            tileColor:
+                                Colors.white, // Ganti warna latar belakang
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            title: Row(
+                              children: [
+                                Icon(Icons.calendar_view_day,
+                                    color: Colors.grey),
+                                const SizedBox(width: 8),
+                                boldText(
+                                  text:
+                                      "${data[index]['order_code']}", // Ganti dengan status pesanan yang sesuai
+                                  color: Color.fromARGB(
+                              255, 219, 201, 32), // Ganti warna sesuai status pesanan
+                                ),
+                              ],
+                            ),
+                            subtitle: Row(
+                              children: [
+                                Icon(Icons.calendar_month_outlined, color: Colors.grey),
+                                const SizedBox(width: 8),
+                                boldText(
+                                  text: intl.DateFormat()
+                                      .add_yMd()
+                                      .add_Hm()
+                                      .format(time),
+                                  color: Colors.grey,
+                                ),
+                              ],
+                            ),
+                            
+                            trailing: boldText(
+                              text:
+                                  "Rp. ${data[index]['total_amount'].toString().numCurrency}",
                               color: purpleColor,
-                              size: 16.0),
-                        ).box.margin(const EdgeInsets.only(bottom: 4)).make();
+                              size: 16.0,
+                            ),
+                          ),
+                        );
                       }),
-                    ),
-                  ),
-                ));
+                    ))));
           }
         }),
       ),
-      /*
-      body:  */
     );
   }
 }

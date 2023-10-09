@@ -4,6 +4,6 @@ Widget normalText({text,color= Colors.black, size=14.0}) {
   return "$text".text.color(color).size(size).make();
 }
 
-Widget boldText({text, color = Colors.black, size = 14.0}){
+Widget boldText({text, color = Colors.black, size = 13.0}){
   return "$text".text.semiBold.color(color).size(size).make();
 }

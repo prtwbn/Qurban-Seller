@@ -4,11 +4,12 @@ import 'package:qurban_seller/controllers/products_controller.dart';
 import 'package:qurban_seller/views/widgets/text_style.dart';
 
 Widget productDropDown(hint, List<String> list, dropvalue, ProductsController controller) {
+  list = list.toSet().toList(); // Menghapus duplikasi
   return Obx(
     () => DropdownButtonHideUnderline(
       child: DropdownButton(
         hint: normalText(text: "$hint", color: fontGrey),
-        value: dropvalue.value == '' ? null : dropvalue.value,
+        value: list.contains(dropvalue.value) ? dropvalue.value : null,
         isExpanded: true,
         items: list.map((e) {
           return DropdownMenuItem(
@@ -17,7 +18,7 @@ Widget productDropDown(hint, List<String> list, dropvalue, ProductsController co
           );
         }).toList(),
         onChanged: (newValue) {
-          if (hint== "Category") {
+          if (hint == "Category") {
             controller.subcategoryvalue.value = '';
             controller.populateSubcategory(newValue.toString());
           }

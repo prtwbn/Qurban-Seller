@@ -14,10 +14,11 @@ class MessagesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print("messagesss");
+    print("Pesan");
     return Scaffold(
+      backgroundColor: Color.fromRGBO(239, 239, 239, 1),
       appBar: AppBar(
-        title: boldText(text: messages, size: 16.0, color: fontGrey),
+        title: boldText(text: "Pesan", size: 16.0, color: fontGrey),
       ),
       body: StreamBuilder(
         stream: StoreServices.getMessages(currentUser!.uid),
@@ -27,17 +28,20 @@ class MessagesScreen extends StatelessWidget {
             return loadingIndicator();
           } else {
             var data = snapshot.data!.docs;
-
+            if (data.isEmpty) {
+              // Jika tidak ada produk
+              return Center(child: Text("Pesan kosong"));
+            }
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
                   child: Column(
                     children: List.generate(data.length, (index) {
-                      // var t = data[index]['created_on'] == null
-                      //     ? DateTime.now()
-                      //     : data[index]['created_on'].toDate();
-                      // var time = intl.DateFormat("h:mma").format(t);
+                      var t = data[index]['created_on'] == null
+                           ? DateTime.now()
+                           : data[index]['created_on'].toDate();
+                       var time = intl.DateFormat("h:mma").format(t);
                       return FutureBuilder<DocumentSnapshot>(
                         future: FirebaseFirestore.instance
                             .collection('users')
@@ -79,6 +83,22 @@ class MessagesScreen extends StatelessWidget {
                               subtitle: normalText(
                                   text: data[index]['last_msg'],
                                   color: darkGrey),
+                              trailing: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    children: [
+      normalText(text: time, color: darkGrey),
+      if (data[index]['unread_count_penjual'] != null &&
+          data[index]['unread_count_penjual'] > 0)
+        CircleAvatar(
+          radius: 10,
+          backgroundColor: Colors.red,
+          child: Text(
+            '${data[index]['unread_count_penjual']}',
+            style: TextStyle(color: Colors.white, fontSize: 12),
+          ),
+        ),
+    ],
+  ),
                             );
                           } else if (snapshot.hasError) {
                             return const Text('Failed to load data');
@@ -93,31 +113,6 @@ class MessagesScreen extends StatelessWidget {
           }
         }),
       ),
-      /*body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-            child: Column(
-          children: List.generate(
-              20,
-              (index) => ListTile(
-                onTap: (){
-                  Get.to(() => const ChatScreen());
-                },
-                    leading: const CircleAvatar(
-                      backgroundColor: purpleColor,
-                      child: Icon(
-                        Icons.person,
-                        color: white,
-                      ),
-                    ),
-                    title: boldText(text: "Username", color: fontGrey),
-                    subtitle:
-                        normalText(text: "last message...", color: darkGrey),
-                    trailing: normalText(text: "10:45PM", color: darkGrey) ,
-                  )),
-        )),
-      ),*/
     );
   }
 }

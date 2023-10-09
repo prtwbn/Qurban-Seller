@@ -15,7 +15,6 @@ class EditProfileScreen extends StatefulWidget {
   final String? username;
   const EditProfileScreen({Key? key, this.username}) : super(key: key);
 
-
   @override
   State<EditProfileScreen> createState() => _EditProfileScreenState();
 }
@@ -34,93 +33,74 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     return Obx(
       () => Scaffold(
         resizeToAvoidBottomInset: false,
-        backgroundColor: yellow2,
+        backgroundColor: Color.fromRGBO(239, 239, 239, 1),
         appBar: AppBar(
-          title: boldText(text: editProfile, size: 16.0),
+          title: boldText(text: "Ubah Profil", size: 16.0),
+           iconTheme: IconThemeData(color: Colors.black), 
           actions: [
             controller.isloading.value
                 ? loadingIndicator(circleColor: white)
                 : TextButton(
                     onPressed: () async {
                       controller.isloading(true);
-    
-                      //if img is not selected
                       if (controller.profileImgPath.value.isNotEmpty) {
                         await controller.uploadProfileImage();
                       } else {
                         controller.profileImageLink =
                             controller.snapshotData['imageUrl'];
                       }
-    
-                      //if old pw match database
-                      if (controller.snapshotData['password'] ==
-                          // ignore: duplicate_ignore
-                          controller.oldpassController.text) {
-                        await controller.changeAuthPassword(
-                            email: controller.snapshotData['email'],
-                            password: controller.oldpassController.text,
-                            newpassword: controller.newpassController.text);
-                        await controller.updateProfile(
-                            imgUrl: controller.profileImageLink,
-                            name: controller.nameController.text,
-                            password: controller.newpassController.text);
-                        
-                        VxToast.show(context, msg: "Updated");
-                      } else if (controller
-                              .oldpassController.text.isEmptyOrNull &&
-                          controller.newpassController.text.isEmptyOrNull) {
-                        await controller.updateProfile(
-                            imgUrl: controller.profileImageLink,
-                            name: controller.nameController.text,
-                            password: controller.snapshotData['password']);
-                            VxToast.show(context, msg: "Updated");
-                        
-                      } else {
-                        VxToast.show(context, msg: "Some error occured");
-                        controller.isloading(false);
-                      }
+
+                      await controller.updateProfile(
+                        imgUrl: controller.profileImageLink,
+                        name: controller.nameController.text,
+                      );
+
+                      VxToast.show(context, msg: "Updated");
+                      Navigator.pop(context);
+                      controller.isloading(false);
                     },
-                    child: normalText(text: save))
+                    child: normalText(text: "Simpan"))
           ],
         ),
         body: Padding(
           padding: const EdgeInsets.all(8.0),
           child: Column(
-              children: [
-                controller.snapshotData['imageUrl'] == '' &&
-                        controller.profileImgPath.isEmpty
-                    ? Image.asset(imgUser, width: 100, fit: BoxFit.cover)
-                        .box
-                        .roundedFull
-                        .clip(Clip.antiAlias)
-                        .make()
-                    : controller.snapshotData['imageUrl'] != '' &&
-                            controller.profileImgPath.isEmpty
-                        ? Image.network(
-                            controller.snapshotData['imageUrl'],
-                            width: 100,
-                            fit: BoxFit.cover,
-                          ).box.roundedFull.clip(Clip.antiAlias).make()
-                        : Image.file(
-                            File(controller.profileImgPath.value),
-                            width: 100,
-                            fit: BoxFit.cover,
-                          ).box.roundedFull.clip(Clip.antiAlias).make(),
-                10.heightBox,
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: white),
-                  onPressed: () {
-                    controller.changeImage(context);
-                  },
-                  child: normalText(text: changeImage, color: fontGrey),
-                ),
-                10.heightBox,
-                const Divider(color: white),
-                customtTextField(
-                    label: name,
-                    hint: "eg. Pratiwi Bagus",
-                    controller: controller.nameController),
-                30.heightBox,
+            children: [
+              controller.snapshotData['imageUrl'] == '' &&
+                      controller.profileImgPath.isEmpty
+                  ? Image.asset(imgUser, width: 100, fit: BoxFit.cover)
+                      .box
+                      .roundedFull
+                      .clip(Clip.antiAlias)
+                      .make()
+                  : controller.snapshotData['imageUrl'] != '' &&
+                          controller.profileImgPath.isEmpty
+                      ? Image.network(
+                          controller.snapshotData['imageUrl'],
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ).box.roundedFull.clip(Clip.antiAlias).make()
+                      : Image.file(
+                          File(controller.profileImgPath.value),
+                          width: 100,
+                          fit: BoxFit.cover,
+                        ).box.roundedFull.clip(Clip.antiAlias).make(),
+              10.heightBox,
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(backgroundColor: white),
+                onPressed: () {
+                  controller.changeImage(context);
+                },
+                child: normalText(text: "Ubah gambar", color: fontGrey),
+              ),
+              10.heightBox,
+              const Divider(color: white),
+              customtTextField(
+                  label: name,
+                  hint: "eg. Peternakan Pak Udin",
+                  controller: controller.nameController),
+              30.heightBox,
+              /*
                 Align(
                     alignment: Alignment.centerLeft,
                     child: boldText(text: "Change Your Password")),
@@ -134,9 +114,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     label: confirmPass,
                     hint: passwordHint,
                     controller: controller.newpassController),
-              ],
-            ),
-          
+                    */
+            ],
+          ),
         ),
       ),
     );

@@ -7,7 +7,6 @@ class ChatsController extends GetxController {
   late String friendName;
   late String friendId;
   late String told;
-
   late CollectionReference chats;
   late String senderName;
   late String currentId;
@@ -45,6 +44,8 @@ class ChatsController extends GetxController {
 
     if (chatSnapshot.docs.isNotEmpty) {
       chatDocId = chatSnapshot.docs.single.id;
+      // Reset the unread count for penjual since they are reading the messages
+  chats.doc(chatDocId).update({'unread_count_penjual': 0});
     } else {
       var addChat = await chats.add({
         'created_on': FieldValue.serverTimestamp(),
@@ -69,6 +70,9 @@ class ChatsController extends GetxController {
         'last_msg': msg,
         'told': friendId,
         'fromId': currentId,
+        'unread_count_penjual': 0, // the sender has read the message
+        'unread_count_pembeli':
+            FieldValue.increment(1) // increment for the receiver
       });
 
       chats.doc(chatDocId).collection(messagesCollection).doc().set({

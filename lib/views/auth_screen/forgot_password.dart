@@ -11,8 +11,8 @@ import 'package:qurban_seller/views/widgets/loading_indicator.dart';
 import 'package:qurban_seller/views/widgets/our_button.dart';
 import 'package:qurban_seller/views/widgets/text_style.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({Key? key}) : super(key: key);
+class PasswordResetScreen extends StatelessWidget {
+  const PasswordResetScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,6 +20,14 @@ class LoginScreen extends StatelessWidget {
     return Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: white,
+        appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back), color: black, // Back arrow icon
+          onPressed: () {
+            Get.back(); // Navigate back when the arrow is pressed
+          },
+        ),
+      ),
         body: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
@@ -38,7 +46,7 @@ class LoginScreen extends StatelessWidget {
               ),
 
               40.heightBox,
-              normalText(text: "Masuk ke akun anda", size: 18.0, color: black),
+              normalText(text: "Reset Password", size: 18.0, color: black),
               10.heightBox,
               Obx(
                 () => Column(
@@ -53,40 +61,7 @@ class LoginScreen extends StatelessWidget {
                         hintText: emailHint,
                       ),
                     ),
-                    10.heightBox,
-                    TextFormField(
-                      obscureText: !controller.showPassword.value,
-                      controller: controller.passwordController,
-                      decoration: InputDecoration(
-                        fillColor: textfieldGrey,
-                        filled: true,
-                        prefixIcon: Icon(Icons.lock, color: purpleColor),
-                        border: InputBorder.none,
-                        hintText: passwordHint,
-                        suffixIcon: IconButton(
-                          onPressed: () {
-                            controller.showPassword.toggle();
-                          },
-                          icon: Icon(
-                            controller.showPassword.value
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: purpleColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    10.heightBox,
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          controller.navigateToPasswordResetPage();
-                        },
-                        child: normalText(
-                            text: "Lupa Password", color: purpleColor),
-                      ),
-                    ),
+                    
                     20.heightBox,
                     SizedBox(
                       width: context.screenWidth - 40,
@@ -94,24 +69,17 @@ class LoginScreen extends StatelessWidget {
                           ? loadingIndicator()
                           : ourButton(
                               color: brown,
-                              title: login,
+                              title: "Kirim email reset password",
                               onPress: () async {
-                                controller.isloading(true);
-
-                                controller
-                                    .loginMethod(context: context)
-                                    .then((value) {
-                                  if (value != null) {
-                                    VxToast.show(context, msg: "logged in");
-                                    controller.isloading(false);
-                                    Get.offAll(() => const Home());
-                                  } else {
-                                    controller.isloading(false);
-                                  }
-                                }).catchError((error) {
-                                  controller.isloading(false);
-                                  // Handle any error that occurs during login
-                                });
+                                if (controller.emailController.text.isEmpty) {
+                              // Show an error message if the email field is empty
+                              VxToast.show(context, msg: "Isi kolom email");
+                            } else {
+                              controller.isloading(true);
+                              await controller
+                                  .resetPassword(); // Call the resetPassword method
+                              controller.isloading(false);
+                            }
                               },
                             ),
                     ),

@@ -4,6 +4,7 @@ import 'package:qurban_seller/const/const.dart';
 import 'package:qurban_seller/controllers/profile_controller.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:qurban_seller/views/widgets/text_style.dart';
+import 'package:geocoding/geocoding.dart';
 
 class GoogleMapWidget extends StatefulWidget {
   final ProfileController controller;
@@ -18,6 +19,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
   GoogleMapController? mapController;
   final LatLng initialPosition = LatLng(-6.1754, 106.8272);
   LatLng? selectedPosition;
+  TextEditingController addressController = TextEditingController();
 
   @override
   void initState() {
@@ -64,6 +66,24 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
               ),
             ),
             Positioned(
+              top: 16.0,
+              left: 10.0,
+              right: 10.0,
+              child: TextFormField(
+                controller: addressController,
+                decoration: InputDecoration(
+                  labelText: 'Masukkan Alamat',
+                  border: OutlineInputBorder(),
+                  suffixIcon: IconButton(
+                    icon: Icon(Icons.search),
+                    onPressed: () {
+                      _setCurrentLocationFromAddress(addressController.text);
+                    },
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
               bottom: 16.0,
               left: 10.0,
               right: 60.0,
@@ -74,8 +94,7 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  primary: Color.fromRGBO(46, 41, 78,
-                      1), // Ubah warna latar belakang sesuai keinginan
+                  primary: Color.fromRGBO(46, 41, 78, 1),
                 ),
                 child: const Text('Save Location'),
               ),
@@ -88,7 +107,6 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
     final permissionStatus = await Geolocator.requestPermission();
     if (permissionStatus == LocationPermission.denied ||
         permissionStatus == LocationPermission.deniedForever) {
-      // Izin akses lokasi ditolak oleh pengguna
       showDialog(
         context: context,
         builder: (BuildContext context) => AlertDialog(
@@ -106,7 +124,6 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
         ),
       );
     } else {
-      // Izin akses lokasi diberikan oleh pengguna
       _getCurrentLocation();
     }
   }
@@ -126,6 +143,31 @@ class _GoogleMapWidgetState extends State<GoogleMapWidget> {
           ),
         ),
       );
+    }
+  }
+
+  void _setCurrentLocationFromAddress(String address) async {
+    try {
+      final locations = await locationFromAddress(address);
+      if (locations != null && locations.isNotEmpty) {
+        final location = locations.first;
+        setState(() {
+          selectedPosition = LatLng(location.latitude, location.longitude);
+        });
+
+        if (mapController != null) {
+          mapController!.animateCamera(
+            CameraUpdate.newCameraPosition(
+              CameraPosition(
+                target: selectedPosition!,
+                zoom: 15,
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print("Error finding location from address: $e");
     }
   }
 
