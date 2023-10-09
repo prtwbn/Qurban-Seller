@@ -6,6 +6,7 @@ import 'package:qurban_seller/controllers/orders_controller.dart';
 import 'package:qurban_seller/views/messages_screen/chat_screen.dart';
 import 'package:qurban_seller/views/orders_screen/components/order_place.dart';
 import 'package:qurban_seller/views/orders_screen/components/order_status.dart';
+import 'package:qurban_seller/views/products_screen/product_detail.dart';
 import 'package:qurban_seller/views/widgets/text_style.dart';
 
 class OrderDetails extends StatefulWidget {
@@ -183,51 +184,74 @@ class _OrderDetailsState extends State<OrderDetails> {
                       icon: Icons.done,
                       title: "Booking",
                       showDone: widget.data['order_placed']),
-                  ElevatedButton(
-                    onPressed: widget.data['order_placed']
-                        ? cancelOrderConfirmation // Ubah dari cancelOrder menjadi cancelOrderConfirmation
-                        : null,
-                    child: const Text("Batalkan Booking"),
-                  ),
                   orderStatus(
                       color: Colors.purple,
                       icon: Icons.done_all_rounded,
                       title: "Done",
                       showDone: widget.data['order_delivered']),
-                  ElevatedButton(
-                    onPressed: (widget.data['order_placed'] &&
-                            !widget.data['order_delivered'])
-                        ? () {
-                            showDialog(
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: const Text("Confirmation"),
-                                    content: const Text(
-                                        "Apakah Anda yakin ingin menyelesaikan bookingan ini?"),
-                                    actions: <Widget>[
-                                      TextButton(
-                                        child: const Text("Tidak"),
-                                        onPressed: () {
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
-                                        },
-                                      ),
-                                      TextButton(
-                                        child: const Text("Ya"),
-                                        onPressed: () async {
-                                          finishOrder(); // Call the finishOrder function
-                                          Navigator.of(context)
-                                              .pop(); // Close the dialog
-                                        },
-                                      ),
-                                    ],
-                                  );
-                                });
-                          }
-                        : null, // Jika order_placed adalah false atau order_delivered adalah true, maka tombol menjadi tidak aktif
-                    child: const Text("Selesaikan Bookingan"),
+                  SizedBox(
+                    width: double.infinity, // Menyesuaikan lebar dengan parent
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        primary: Color.fromARGB(255, 219, 201, 32),
+                        onPrimary: Colors.black,
+                        padding:
+                            EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                      ),
+                      onPressed: widget.data['order_placed']
+                          ? cancelOrderConfirmation
+                          : null,
+                      child: Text("Cancel Booking"),
+                    ),
                   ),
+                  SizedBox(
+                      width:
+                          double.infinity, // Menyesuaikan lebar dengan parent
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          primary: Color.fromARGB(
+                              255, 219, 201, 32), // Warna latar belakang
+                          onPrimary: Colors.black, // Warna teks
+                          padding: EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 24), // Padding tombol
+                          shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.circular(8), // Bentuk tombol
+                          ),
+                        ),
+                        onPressed: (widget.data['order_placed'] &&
+                                !widget.data['order_delivered'])
+                            ? () {
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                        title: const Text("Confirmation"),
+                                        content: const Text(
+                                            "Apakah Anda yakin ingin menyelesaikan bookingan ini?"),
+                                        actions: <Widget>[
+                                          TextButton(
+                                            child: const Text("Tidak"),
+                                            onPressed: () {
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                          TextButton(
+                                            child: const Text("Ya"),
+                                            onPressed: () async {
+                                              finishOrder(); // Call the finishOrder function
+                                              Navigator.of(context)
+                                                  .pop(); // Close the dialog
+                                            },
+                                          ),
+                                        ],
+                                      );
+                                    });
+                              }
+                            : null, // Jika order_placed adalah false atau order_delivered adalah true, maka tombol menjadi tidak aktif
+                        child: const Text("Selesaikan Bookingan"),
+                      )),
                 ],
               )
                   .box
@@ -248,9 +272,11 @@ class _OrderDetailsState extends State<OrderDetails> {
                     //d2: DateTime.now(),
                     d2: intl.DateFormat()
                         .add_yMd()
-                        .format((widget.data['order_date'].toDate())),
-                    title1: "Order Code",
-                    title2: "Order Date",
+                        .add_Hm()
+                        .format(widget.data['order_date'].toDate()),
+
+                    title1: "No Pesanan",
+                    title2: "Waktu Booking",
                   ),
                   Padding(
                     padding: const EdgeInsets.symmetric(
@@ -263,7 +289,8 @@ class _OrderDetailsState extends State<OrderDetails> {
                           children: [
                             //"Shipping Booked".text.fontFamily(semibold).make(),
                             boldText(
-                                text: "Shipping Address", color: purpleColor),
+                                text: "Informasi pembooking",
+                                color: purpleColor),
                             "${widget.data['order_by_name']}".text.make(),
                             "${widget.data['order_by_email']}".text.make(),
                             "${widget.data['order_by_nohp']}".text.make(),
@@ -275,12 +302,12 @@ class _OrderDetailsState extends State<OrderDetails> {
                             mainAxisAlignment: MainAxisAlignment.start,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              boldText(text: "Total harga", color: purpleColor),
                               boldText(
-                                  text: "Total Amount", color: purpleColor),
-                              boldText(
-                                  text: "Rp. ${widget.data['total_amount']}",
+                                  text:
+                                      "Rp. ${widget.data['total_amount'].toString().numCurrency}",
                                   color: red,
-                                  size: 16.0)
+                                  size: 14.0)
                             ],
                           ),
                         )
@@ -312,14 +339,62 @@ class _OrderDetailsState extends State<OrderDetails> {
                   controller.orders.length,
                   ((index) {
                     return Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        orderPlaceDetails(
-                            title1: "${controller.orders[index]['title']}",
-                            title2:
-                                "Rp.${controller.orders[index]['tprice'].toString().numCurrency}",
-                            d1: "${controller.orders[index]['qty']}x",
-                            d2: ""),
+                        GestureDetector(
+                          onTap: () {
+                            // Pindah ke halaman ProductDetails saat item produk ditekan
+                           
+                          },
+                          child: Row(
+                            children: [
+                              Image.network(
+                                controller.orders[index]['img'],
+                                width: 40,
+                                fit: BoxFit.cover,
+                              ),
+                              const SizedBox(width: 8),
+                              // Spasi antara gambar dan judul
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${controller.orders[index]['title']}",
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16.0,
+                                    ),
+                                  ),
+                                  Text(
+                                    "${controller.orders[index]['qty']}x",
+                                    style: TextStyle(
+                                      fontSize: 14.0,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(width: 20),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      "Rp.${controller.orders[index]['tprice'].toString().numCurrency}",
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                    Text(
+                                      "",
+                                      style: TextStyle(
+                                        fontSize: 14.0,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        10.heightBox,
                         const Divider(),
                         SizedBox(
                           width: double.infinity,
@@ -336,7 +411,7 @@ class _OrderDetailsState extends State<OrderDetails> {
                                 arguments: [
                                   widget.data['order_by'],
                                   widget.data['order_by_name'],
-                                  widget.data['orders'][index]['vendor_id'],
+                                  controller.orders[index]['vendor_id'],
                                 ],
                               );
                             },

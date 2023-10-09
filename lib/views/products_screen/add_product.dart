@@ -35,25 +35,27 @@ class _AddProductState extends State<AddProduct> {
     controller.init();
     return Obx(
       () => Scaffold(
-        backgroundColor: yellow2,
+   backgroundColor: Color.fromRGBO(239, 239, 239, 1),
         appBar: AppBar(
           leading: IconButton(
               onPressed: () {
                 Get.back();
               },
-              icon: const Icon(Icons.arrow_back)),
-          title: boldText(text: "Add Product", size: 16.0),
+              icon: const Icon(Icons.arrow_back), color: black,),
+          title: boldText(text: "Tambah Hewan", size: 16.0),
           actions: [
             controller.isloading.value
                 ? loadingIndicator(circleColor: white)
                 : TextButton(
                     onPressed: () async {
-                      controller.isloading(true);
-                      await controller.uploadImages();
-                      await controller.uploadProduct(context);
-                      Get.back();
+                      if (controller.isValidForm(context)) {
+                        controller.isloading(true);
+                        await controller.uploadImages();
+                        await controller.uploadProduct(context);
+                        Get.back();
+                      }
                     },
-                    child: boldText(text: save, color: black))
+                    child: boldText(text: "Simpan", color: black))
           ],
         ),
         body: Padding(
@@ -69,23 +71,21 @@ class _AddProductState extends State<AddProduct> {
                 productDropDown("Subcategory", controller.subcategoryList,
                     controller.subcategoryvalue, controller),
                 10.heightBox,
-                
                 Obx(
-  () => DropdownButton<String>(
-    value: controller.selectedGender.value,
-    onChanged: (String? newValue) {
-      controller.selectedGender.value = newValue!;
-    },
-    items: <String>['Jantan', 'Betina']
-        .map<DropdownMenuItem<String>>((String value) {
-      return DropdownMenuItem<String>(
-        value: value,
-        child: Text(value),
-      );
-    }).toList(),
-  ),
-),
-
+                  () => DropdownButton<String>(
+                    value: controller.selectedGender.value,
+                    onChanged: (String? newValue) {
+                      controller.selectedGender.value = newValue!;
+                    },
+                    items: <String>['Jantan', 'Betina']
+                        .map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  ),
+                ),
                 10.heightBox,
                 customtTextField(
                     hint: "eg. Kambing Etawa",
@@ -109,9 +109,11 @@ class _AddProductState extends State<AddProduct> {
                     controller: controller.pberatController),
                 10.heightBox,
                 customtTextField(
-                    hint: "eg. Rp. 1.500.000",
-                    label: "Harga",
-                    controller: controller.ppriceController),
+                  hint: "eg. 1500000 (tanpa titik)",
+                  label: "Harga",
+                  controller: controller.ppriceController,
+                  keyboardType: TextInputType.number, // Hanya boleh angka
+                ),
                 10.heightBox,
                 customtTextField(
                     hint: "eg. 20",
@@ -119,33 +121,63 @@ class _AddProductState extends State<AddProduct> {
                     controller: controller.pquantityController),
                 10.heightBox,
                 customtTextField(
-                    hint: "Ya (jika ya lampirkan) atau Tidak",
+                    hint: "Ada (jika ada lampirkan) atau Tidak ada",
                     label: "Apakah memiliki Surat Keterangan Sehat ?",
                     controller: controller.psksController),
+                20.heightBox,
+                normalText(
+                    text:
+                        "Kolom tidak boleh ada yang kosong, jika kosong hewan tidak terupload !",
+                    color: black),
                 10.heightBox,
-                const Divider(color: white),
-                boldText(text: "Choose product images"),
+                const Divider(color: black),
+                boldText(text: "Pilih gambar hewan"),
                 10.heightBox,
                 Obx(
-                  () => Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  () => Wrap(
+                    spacing: 20,
+                    runSpacing: 12,
                     children: List.generate(
-                        3,
-                        (index) => controller.pImagesList[index] != null
-                            ? Image.file(
-                                controller.pImagesList[index],
-                                width: 100,
-                              ).onTap(() {
-                                controller.pickImage(index, context);
-                              })
-                            : productImages(label: "${index + 1}").onTap(() {
-                                controller.pickImage(index, context);
-                              })),
+                      9,
+                      (index) => controller.pImagesList[index] != null
+                          ? Stack(
+                              alignment: Alignment.topRight,
+                              children: [
+                                Image.file(
+                                  controller.pImagesList[index],
+                                  width: 100,
+                                ).onTap(() {
+                                  controller.pickImage(index, context);
+                                }),
+                                IconButton(
+                                  icon: Icon(Icons.delete, color: Colors.red),
+                                  onPressed: () {
+                                    controller.deleteImage(index);
+                                  },
+                                )
+                              ],
+                            )
+                          : Container(
+                              width: 100,
+                              height: 100,
+                              color: Colors
+                                  .white, // Ganti dengan warna yang Anda inginkan
+                              child: Center(
+                          child: Icon(
+                            Icons.add, // Ganti ikon sesuai keinginan Anda
+                            color: Colors.black, // Warna ikon
+                          ),
+                        ),
+                            ).onTap(() {
+                              controller.pickImage(index, context);
+                            }),
+                    ),
                   ),
                 ),
                 5.heightBox,
                 normalText(
-                    text: "First image will be your display image",
+                    text:
+                        "Gambar pertama akan menjadi tampilan depan hewan (masukkan setidaknya 1 gambar)",
                     color: black),
                 10.heightBox,
                 /*

@@ -6,8 +6,10 @@ const profileIconsTitle = [shopSettings, meesages, logout];
 const popupMenuTitles = [edit,remove];
 const popupMenuIcons = [Icons.edit, Icons.delete];
 
-const profileButtonsTitles = ["Lokasi Toko",
-  "Settings"];
-const profileButtonsIcons = [ Icons.location_on,
-  Icons.settings];
+const profileButtonsTitles = [
+  "Ubah Password",
+  "Logout"];
+const profileButtonsIcons = [ 
+  Icons.password,
+  Icons.logout];
 

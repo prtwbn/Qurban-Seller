@@ -7,12 +7,13 @@ class StoreServices {
         .where('id', isEqualTo: uid)
         .get();
   }
-
+  
   static getMessages(uid) {
     print(uid);
     return firestore
         .collection(chatsCollection)
         .where('users', arrayContains: uid)
+         .orderBy('created_on', descending: true)  // Urutkan berdasarkan 'created_on' dengan yang terbaru di atas
         .snapshots();
   }
 

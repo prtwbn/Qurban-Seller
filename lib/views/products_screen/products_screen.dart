@@ -18,6 +18,7 @@ class ProductsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     var controller = Get.put(ProductsController());
     return Scaffold(
+      backgroundColor: Color.fromRGBO(239, 239, 239, 1),
       floatingActionButton: FloatingActionButton(
         backgroundColor: yellow,
         onPressed: () async {
@@ -35,15 +36,16 @@ class ProductsScreen extends StatelessWidget {
             return loadingIndicator();
           } else {
             var data = snapshot.data!.docs;
+            if (data.isEmpty) {
+              // Jika tidak ada produk
+              return Center(child: Text("Belum ada produk yang ditambahkan"));
+            }
             return Padding(
               padding: const EdgeInsets.all(8.0),
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 child: Column(
-                  
-                  children: 
-                  
-                  List.generate(
+                  children: List.generate(
                     data.length,
                     ((index) => Card(
                           child: ListTile(
@@ -52,15 +54,24 @@ class ProductsScreen extends StatelessWidget {
                                     data: data[index],
                                   ));
                             },
-                            leading: Image.network(data[index]['p_imgs'][0],
-                                width: 100, height: 100, fit: BoxFit.cover),
+                            leading: Image.network(
+                              data[index]['p_imgs'][0],
+                              width: 100,
+                              height: 100,
+                              fit: BoxFit.cover,
+                              errorBuilder: (BuildContext context,
+                                  Object exception, StackTrace? stackTrace) {
+                                return Text('Gambar gagal dimuat');
+                              },
+                            ),
                             title: boldText(
                                 text: "${data[index]['p_jenishewan']}",
                                 color: fontGrey),
                             subtitle: Row(
                               children: [
                                 normalText(
-                                    text: "Rp. ${double.parse(data[index]['p_price']).numCurrency}",
+                                    text:
+                                        "Rp. ${double.parse(data[index]['p_price']).numCurrency}",
                                     color: darkGrey),
                                 10.widthBox,
                                 //boldText(text: "Featured", color: green),
@@ -85,13 +96,14 @@ class ProductsScreen extends StatelessWidget {
                                             switch (i) {
                                               case 0:
                                                 Get.to(() => EditProduct(
-                                                    data: data[
-                                                        index]));
+                                                    data: data[index]));
                                                 break;
                                               case 1:
-                                              controller.removeProduct(data[index].id);
-                                              VxToast.show(context, msg: "Product Removed");
-                                              break;
+                                                controller.removeProduct(
+                                                    data[index].id);
+                                                VxToast.show(context,
+                                                    msg: "Produk Terhapus");
+                                                break;
                                               default:
                                             }
                                           }),

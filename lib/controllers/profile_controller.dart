@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -12,7 +13,7 @@ import 'package:qurban_seller/const/const.dart';
 import 'package:path/path.dart';
 
 class ProfileController extends GetxController {
-  late QueryDocumentSnapshot snapshotData ;
+  late QueryDocumentSnapshot snapshotData;
   var profileImgPath = ''.obs;
   var profileImageLink = '';
   var isloading = false.obs;
@@ -26,13 +27,41 @@ class ProfileController extends GetxController {
   var shopMobileController = TextEditingController();
   var shopDescController = TextEditingController();
 
+  Future<File> compressImage(File file) async {
+    int targetSize = 1024 * 1024; // 1MB
+    var quality = 90;
+
+    while (await file.length() > targetSize && quality > 10) {
+      File? result = await FlutterImageCompress.compressAndGetFile(
+        file.path,
+        file.path,
+        quality: quality,
+      ) as File?;
+
+      if (result != null) {
+        file = result;
+        quality -= 5;
+      } else {
+        break; // Keluar dari loop jika hasil kompresi null
+      }
+    }
+
+    return file;
+  }
+
   changeImage(context) async {
     try {
-      final img = await ImagePicker()
-          .pickImage(source: ImageSource.gallery, imageQuality: 70);
-      if (img == null) return;
-      profileImgPath.value = img.path;
-      profileImgPath.value = img.path;
+      final XFile? xFile =
+          await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (xFile == null) return;
+
+      File file = File(xFile.path); // Konversi XFile ke File di sini
+      if (await file.length() > 1024 * 1024) {
+        file = await compressImage(file);
+        profileImgPath.value = file.path;
+      } else {
+        profileImgPath.value = xFile.path;
+      }
     } on PlatformException catch (e) {
       VxToast.show(context, msg: e.toString());
     }
@@ -46,14 +75,21 @@ class ProfileController extends GetxController {
     profileImageLink = await ref.getDownloadURL();
   }
 
-  updateProfile({name, password, imgUrl}) async {
+  updateProfile({name, imgUrl}) async {
     var store = firestore.collection(vendorsCollection).doc(currentUser!.uid);
-    await store.set({'name': name, 'password': password, 'imageUrl': imgUrl},
+    await store.set({'name': name, 'imageUrl': imgUrl},
+        SetOptions(merge: true));
+    isloading(false);
+  }
+  
+  updatePw({password}) async {
+    var store = firestore.collection(vendorsCollection).doc(currentUser!.uid);
+    await store.set({'password': password},
         SetOptions(merge: true));
     isloading(false);
   }
 
-  changeAuthPassword({email,password,newpassword}) async {
+  changeAuthPassword({email, password, newpassword}) async {
     final cred = EmailAuthProvider.credential(email: email, password: password);
 
     await currentUser!.reauthenticateWithCredential(cred).then((value) {
@@ -73,8 +109,9 @@ class ProfileController extends GetxController {
   }
 
   void saveVendorLocation(LatLng position) {
-    final store =
-        FirebaseFirestore.instance.collection(vendorsCollection).doc(currentUser!.uid);
+    final store = FirebaseFirestore.instance
+        .collection(vendorsCollection)
+        .doc(currentUser!.uid);
     store.set(
       {
         //'shop_name': shopNameController.text,
@@ -88,18 +125,14 @@ class ProfileController extends GetxController {
     isloading(false);
   }
 
-
-  
-
   updateShop({shopname, shopaddress, shopmobile, shopdesc}) async {
     var store = firestore.collection(vendorsCollection).doc(currentUser!.uid);
     await store.set({
-      'shop_name' : shopname,
+      'shop_name': shopname,
       //'shop_address' : shopaddress,
-      'shop_mobile' : shopmobile,
+      'shop_mobile': shopmobile,
       'shop_desc': shopdesc,
-    },
-        SetOptions(merge: true));
+    }, SetOptions(merge: true));
     isloading(false);
   }
 }
